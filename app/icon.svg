@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#38bdf8"/></linearGradient></defs>
+  <rect width="256" height="256" rx="48" fill="#0f172a"/>
+  <path d="M64 160l48-96l32 64l48-32l-32 64l-32-64z" fill="url(#g)" stroke="#e2e8f0" stroke-width="6" stroke-linejoin="round"/>
+  <text x="50%" y="210" text-anchor="middle" font-family="system-ui,Arial" font-size="28" fill="#e2e8f0">FTW</text>
+</svg>
