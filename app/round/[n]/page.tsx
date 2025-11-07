@@ -20,11 +20,47 @@ export default function RoundPage({ params }: { params: { n: string }}) {
     (async () => {
       const { data: team } = await supabase.from('teams').select('id,name').match({ game_id: gid, name, pin }).single();
       setTeamInfo(team || {});
-      let { data: rnd } = await supabase.from('rounds').select('id,is_open').match({ game_id: gid, round_number: roundNo }).single();
-      if (!rnd) {
-        const res = await supabase.from('rounds').insert({ game_id: gid, round_number: roundNo }).select('id').single();
-        rnd = res.data;
-      }
+     useEffect(() => {
+  const gid = localStorage.getItem('fw_game_id') || '';
+  const name = localStorage.getItem('fw_team_name') || '';
+  const pin = localStorage.getItem('fw_team_pin') || '';
+  setGameId(gid);
+  (async () => {
+    const { data: team } = await supabase
+      .from('teams')
+      .select('id,name')
+      .match({ game_id: gid, name, pin })
+      .single();
+    setTeamInfo(team || {});
+
+    // 👇 Fetch round WITH is_open included
+    let { data: rnd } = await supabase
+      .from('rounds')
+      .select('id,is_open')
+      .match({ game_id: gid, round_number: roundNo })
+      .single();
+
+    if (!rnd) {
+      // 👇 After insert, also select id & is_open
+      const { data: created } = await supabase
+        .from('rounds')
+        .insert({ game_id: gid, round_number: roundNo })
+        .select('id,is_open')
+        .single();
+      rnd = created;
+    }
+
+    setRoundId(rnd?.id || '');
+
+    const { data: qs } = await supabase
+      .from('questions')
+      .select('id,q_number,prompt')
+      .eq('round_id', rnd?.id)
+      .order('q_number');
+    setQuestions(qs || []);
+  })();
+}, [roundNo]);
+
       setRoundId(rnd?.id || '');
       const { data: qs } = await supabase.from('questions').select('id,q_number,prompt').eq('round_id', rnd?.id).order('q_number');
       setQuestions(qs || []);
