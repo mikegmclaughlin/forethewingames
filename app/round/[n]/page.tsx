@@ -13,59 +13,48 @@ export default function RoundPage({ params }: { params: { n: string }}) {
   const [status, setStatus] = useState('');
 
   useEffect(() => {
-    const gid = localStorage.getItem('fw_game_id') || '';
-    const name = localStorage.getItem('fw_team_name') || '';
-    const pin = localStorage.getItem('fw_team_pin') || '';
-    setGameId(gid);
-    (async () => {
-      const { data: team } = await supabase.from('teams').select('id,name').match({ game_id: gid, name, pin }).single();
-      setTeamInfo(team || {});
-     useEffect(() => {
   const gid = localStorage.getItem('fw_game_id') || '';
   const name = localStorage.getItem('fw_team_name') || '';
   const pin = localStorage.getItem('fw_team_pin') || '';
   setGameId(gid);
+
   (async () => {
+    // 1) Confirm the team
     const { data: team } = await supabase
       .from('teams')
       .select('id,name')
       .match({ game_id: gid, name, pin })
-      .single();
+      .maybeSingle(); // safer than .single() if not found
     setTeamInfo(team || {});
 
-    // 👇 Fetch round WITH is_open included
-    let { data: rnd } = await supabase
+    // 2) Load or create the round (make sure we always have id + is_open)
+    let { data: round } = await supabase
       .from('rounds')
       .select('id,is_open')
       .match({ game_id: gid, round_number: roundNo })
-      .single();
+      .maybeSingle();
 
-    if (!rnd) {
-      // 👇 After insert, also select id & is_open
+    if (!round) {
       const { data: created } = await supabase
         .from('rounds')
         .insert({ game_id: gid, round_number: roundNo })
         .select('id,is_open')
         .single();
-      rnd = created;
+      round = created;
     }
 
-    setRoundId(rnd?.id || '');
+    // 3) Now round is in scope here, so use it before the IIFE closes
+    setRoundId(round?.id || '');
 
     const { data: qs } = await supabase
       .from('questions')
       .select('id,q_number,prompt')
-      .eq('round_id', rnd?.id)
+      .eq('round_id', round?.id)
       .order('q_number');
+
     setQuestions(qs || []);
   })();
 }, [roundNo]);
-
-      setRoundId(rnd?.id || '');
-      const { data: qs } = await supabase.from('questions').select('id,q_number,prompt').eq('round_id', rnd?.id).order('q_number');
-      setQuestions(qs || []);
-    })();
-  }, [roundNo]);
 
   async function submitAnswers() {
     if (!teamInfo?.id) { setStatus('Team not found. Re‑join.'); return; }
