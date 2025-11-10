@@ -21,10 +21,11 @@ export async function POST(req: Request) {
   }
 
   const { error } = await supabase.from('questions').upsert({
-    round_id: round?.id,
-    q_number: qNumber,
-    prompt
-  }, { onConflict: 'round_id,q_number' });
+  round_id: round?.id,
+  q_number: qNumber,
+  prompt,
+  points: points ?? 1   // 👈 new line
+}, { onConflict: 'round_id,q_number' });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json({ ok: true });
