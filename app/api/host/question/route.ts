@@ -8,7 +8,8 @@ const supabase = createClient(
 );
 
 export async function POST(req: Request) {
-  const { roundNumber, qNumber, prompt } = await req.json();
+  const { roundNumber, qNumber, prompt, points } = await req.json();
+
 
   const { data: game } = await supabase.from('games').select('id').order('starts_at', { ascending: false }).limit(1).single();
   const gid = game?.id;
