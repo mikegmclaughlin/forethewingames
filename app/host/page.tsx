@@ -76,6 +76,11 @@ export default function Host() {
           </div>
         </div>
       )}
-    </section>
+    </section><p className="small" style={{marginTop:12}}>
+  Review pages: {[1,2,3,4,5,6,7,8].map(n =>
+    <a key={n} href={`/host/review/${n}`} style={{marginRight:8}}>Round {n}</a>
+  )}
+</p>
+
   );
 }
